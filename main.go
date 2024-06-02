@@ -69,17 +69,13 @@ func isRaspberryPiRunning() bool {
 }
 
 func powerOn() {
-	pin := rpio.Pin(gpioPin)
-	pin.Output()
-	pin.Low()
+	cmd := exec.Command("sudo", "rtcwake", "-m", "mem", "-s", "0")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	// Wait for a short duration to ensure the wake-up signal is detected
-	time.Sleep(100 * time.Millisecond)
-
-	// Set the pin back to input mode to avoid holding it low indefinitely
-	pin.Input()
-
-	fmt.Println("Wake-up signal sent.")
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Failed to trigger wake-up:", err)
+	}
 }
 
 func shutdown() {
