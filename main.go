@@ -69,7 +69,17 @@ func isRaspberryPiRunning() bool {
 }
 
 func powerOn() {
-	// Implement your power-on logic here
+	pin := rpio.Pin(gpioPin)
+	pin.Output()
+	pin.Low()
+
+	// Wait for a short duration to ensure the wake-up signal is detected
+	time.Sleep(100 * time.Millisecond)
+
+	// Set the pin back to input mode to avoid holding it low indefinitely
+	pin.Input()
+
+	fmt.Println("Wake-up signal sent.")
 }
 
 func shutdown() {
