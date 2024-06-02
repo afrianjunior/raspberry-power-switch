@@ -1,57 +1,84 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"os"
+	"os/exec"
 	"time"
 
-	"github.com/stianeikeland/go-rpio/v4"
+	rpio "github.com/stianeikeland/go-rpio/v4"
 )
 
+const (
+	gpioPin        = 17
+	shutdownTime   = 3 // seconds
+	longPressTime  = 3 // seconds
+	debouncePeriod = 50 * time.Millisecond
+)
+
+var lastPressTime time.Time
+
 func main() {
-	// Open and map memory to access gpio, check for errors
+	// Open and map memory to access GPIO, check for errors
 	if err := rpio.Open(); err != nil {
-		fmt.Println("Failed to open gpio:", err)
+		fmt.Println("Failed to open GPIO:", err)
 		return
 	}
 	defer rpio.Close()
 
-	// Pin definitions
-	touchPin := rpio.Pin(17) // GPIO17
-	ledPin := rpio.Pin(18)   // GPIO18
+	// Set GPIO pin mode to input
+	button := rpio.Pin(gpioPin)
+	button.Input()
 
-	// Set touchPin as input
-	touchPin.Input()
-
-	// Set ledPin as output
-	ledPin.Output()
-
-	ledState := rpio.Low // Initialize LED state to Low (off)
-
-	fmt.Println("Touch sensor is ready. Touch to toggle LED.")
+	fmt.Println("Waiting for button press...")
 
 	for {
-		// Wait for a touch event
-		if touchPin.Read() == rpio.High {
-			// Debounce: wait a short period to confirm touch
-			time.Sleep(300 * time.Millisecond)
-
-			if touchPin.Read() == rpio.High {
-				// Toggle LED state
-				if ledState == rpio.Low {
-					ledState = rpio.High
-					ledPin.High()
-					fmt.Println("LED is now ON")
-				} else {
-					ledState = rpio.Low
-					ledPin.Low()
-					fmt.Println("LED is now OFF")
-				}
+		// Wait for a rising edge (button press)
+		if button.Read() == rpio.High {
+			fmt.Println("Button pressed!")
+			if time.Since(lastPressTime) < debouncePeriod {
+				// Ignore button press if within debounce period
+				continue
 			}
+			lastPressTime = time.Now()
 
-			// Wait for touch to end before continuing
-			for touchPin.Read() == rpio.High {
-				time.Sleep(50 * time.Millisecond)
+			// Check if the Raspberry Pi is already running
+			if isRaspberryPiRunning() {
+				// If already running, initiate shutdown
+				fmt.Println("Initiating shutdown...")
+				shutdown()
+			} else {
+				// If not running, power on the Raspberry Pi
+				fmt.Println("Raspberry Pi is off. Powering on...")
+				powerOn()
 			}
 		}
+		time.Sleep(debouncePeriod)
+	}
+}
+
+func isRaspberryPiRunning() bool {
+	cmd := exec.Command("hostnamectl", "status")
+	output, err := cmd.Output()
+	if err != nil {
+		fmt.Println("Failed to get hostname status:", err)
+		return false
+	}
+	return !bytes.Contains(output, []byte("off"))
+}
+
+func powerOn() {
+	// Implement your power-on logic here
+}
+
+func shutdown() {
+	// Execute the shutdown command
+	cmd := exec.Command("sudo", "shutdown", "-h", "now")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Failed to initiate shutdown:", err)
 	}
 }
