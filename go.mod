@@ -1,6 +1,6 @@
 module github.com/afrianjunior/raspberry-power-off
 
-go 1.21.1
+go 1.21
 
 require (
 	periph.io/x/conn/v3 v3.7.0 // indirect
