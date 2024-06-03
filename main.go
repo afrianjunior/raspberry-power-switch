@@ -36,25 +36,29 @@ func main() {
 	for {
 		// Wait for a rising edge (button press)
 		if button.Read() == rpio.High {
-			fmt.Println("Button pressed!")
-			if time.Since(lastPressTime) < debouncePeriod {
-				// Ignore button press if within debounce period
-				continue
-			}
-			lastPressTime = time.Now()
+			// fmt.Println("Button pressed!")
+			// if time.Since(lastPressTime) < debouncePeriod {
+			// 	// Ignore button press if within debounce period
+			// 	continue
+			// }
+			// lastPressTime = time.Now()
 
 			// Check if the Raspberry Pi is already running
-			if isRaspberryPiRunning() {
-				// If already running, initiate shutdown
-				fmt.Println("Initiating shutdown...")
-				shutdown()
-			} else {
-				// If not running, power on the Raspberry Pi
-				fmt.Println("Raspberry Pi is off. Powering on...")
-				powerOn()
-			}
+			// if isRaspberryPiRunning() {
+			// 	// If already running, initiate shutdown
+			// 	fmt.Println("Initiating shutdown...")
+			// 	shutdown()
+			// } else {
+			// 	// If not running, power on the Raspberry Pi
+			// 	fmt.Println("Raspberry Pi is off. Powering on...")
+			// 	powerOn()
+			// }
+
+			fmt.Println("Raspberry Pi is off. Powering on...")
+			powerOn()
+			time.Sleep(debouncePeriod)
 		}
-		time.Sleep(debouncePeriod)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
