@@ -36,7 +36,7 @@ func main() {
 
 	for {
 		// Wait for a rising edge (button press)
-		if button.Read() == rpio.Low {
+		if button.Read() == rpio.High {
 			// fmt.Println("Button pressed!")
 			// if time.Since(lastPressTime) < debouncePeriod {
 			// 	// Ignore button press if within debounce period
@@ -77,7 +77,7 @@ func isRaspberryPiRunning() bool {
 }
 
 func powerOn() {
-	cmd := exec.Command("sudo", "rtcwake", "-m", "on", "-s", "0")
+	cmd := exec.Command("sudo", "rtcwake", "-m", "mem", "-s", "0")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
