@@ -30,6 +30,7 @@ func main() {
 	// Set GPIO pin mode to input
 	button := rpio.Pin(gpioPin)
 	button.Input()
+	button.PullUp()
 
 	fmt.Println("Waiting for button press...")
 
