@@ -54,8 +54,11 @@ func main() {
 			// 	powerOn()
 			// }
 
-			fmt.Println("Raspberry Pi is off. Powering on...")
-			powerOn()
+			fmt.Println(rpio.High, "HIGH")
+			fmt.Println(rpio.Low, "LOW")
+
+			// fmt.Println("Raspberry Pi is off. Powering on...")
+			// powerOn()
 			time.Sleep(debouncePeriod)
 		}
 		time.Sleep(100 * time.Millisecond)
